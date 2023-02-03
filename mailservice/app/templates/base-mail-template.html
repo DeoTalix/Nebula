@@ -1,0 +1,17 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    {% block head %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ subject }}</title>
+    <style>
+        {% block style %}{% endblock style %}
+    </style>
+    {% endblock head %}
+</head>
+<body>
+    <img src="{% if current_host is not None %}https://{% endif %}{{ current_host }}{{ current_port }}{% url 'tracking-image' person_id=person_id mail_id=mail_id %}" alt="logo" width="20"/>
+    {% block body %}{% endblock body %}
+</body>
+</html>

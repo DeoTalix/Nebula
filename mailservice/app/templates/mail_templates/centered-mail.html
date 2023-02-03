@@ -1,0 +1,25 @@
+{% extends 'base-mail-template.html' %}
+
+{% block head %}
+{{ block.super }}
+<style>
+    .content {
+        font-family: serif;
+        font-size: 20px;
+        background: #d7e7ff;
+        padding: 20px 40px;
+        border-radius: 5px;
+    }
+    h1 {
+        font-size: 24px;
+    }
+</style>
+{% endblock head %}
+
+{% block body %}
+<center class="content">
+    <p>
+        {{ content | safe }}
+    </p>
+</center>
+{% endblock body %}

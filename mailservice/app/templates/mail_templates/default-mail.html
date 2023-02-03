@@ -1,0 +1,13 @@
+{% extends 'base-mail-template.html' %}
+
+{% block body %}
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    {{ content | safe }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock body %}

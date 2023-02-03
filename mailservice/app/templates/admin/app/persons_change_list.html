@@ -1,0 +1,128 @@
+{% extends 'admin/change_list.html' %}
+
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css">
+<link rel="stylesheet" type="text/css" href="/static/css/control-panel.css">
+{% endblock extrastyle %}
+
+
+{% block extrahead %}
+<script type="text/javascript" src="/static/js/control-panel.js"></script>
+<script type="text/javascript">
+    const mailTemplateListUrl = "{% url 'ajax-get-mail-template-list' %}";
+    const templatePreviewUrl = "{% url 'ajax-email-preview' %}";
+</script>
+{% endblock extrahead %}
+
+
+{% block object-tools-items %}
+<li>
+    <a href="javascript:void(0);" 
+    id="send-message-btn" 
+    class="addLink inactive sendMessageBtn">
+        Отправить сообщение
+    </a>
+</li>
+{{ block.super }}
+{% endblock object-tools-items %}
+
+{% block content %}
+{{ block.super }}
+<div id="send-message-popup" class="popup">
+    <h1>Форма создания нового сообщения</h1>  
+    <form name="newMessageForm" 
+        role="form"
+        enctype="multipart/form-data" 
+        action="{% url 'ajax-new-message-form' %}"
+        method="post" 
+        novalidate>
+    {% csrf_token %}
+    <fieldset class="module aligned">
+        <div class="form-row">
+            <div>
+                <label for="due_date">Дата будущего отправления</label>
+                <input id="due_date" 
+                       name="due_date" 
+                       type="datetime-local" 
+                       class="vDateField"
+                       required />
+                <br/>
+                <span>Если дата не указана, сообщения будет отправлено сразу при нажатии на кнопку "Отправить"</span>
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label for="subject" class="required">Тема сообщения</label>
+                <input type="text" 
+                       id="subject" 
+                       name="subject" 
+                       value="" 
+                       class="vTextField" 
+                       maxlength="200" 
+                       placeholder="Тема сообщения"
+                       required />
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label for="message" class="required">Текст сообщения</label>
+                <textarea id="message" 
+                          name="message" 
+                          placeholder="Текст сообщения" 
+                          rows="10" 
+                          cols="40" 
+                          class="vLargeTextField"
+                          required >
+<h1>Уважаемый, &#123;&#123; username &#125;&#125;</h1>
+<p>
+    Cегодня <span class="birthday">&#123;&#123; birthday &#125;&#125;</span> - самый лучший день в году! С днем рождения Вас! 
+</p>
+<p>
+    <i>С уважением.</i>
+</p>
+&#123;% if False %&#125;
+Эта надпись не отрендерится.
+&#123;% endif %&#125;
+                </textarea>
+                <br/><br/>
+                <p>Используйте <b style="color:#0400ff;">&#123;&#123; username &#125;&#125;</b> и <b style="color:#0400ff;">&#123;&#123; birthday &#125;&#125;</b> чтобы поздравить пользователей с днем рождения.</p>
+                <p>Для рендеринга импользуется django template engine, поэтому будут работать соответствующие синтаксические кострукции.</p>
+                <p>Нажмите кнопку <b>"Предпросмотр"</b>, чтобы проверить.</p>
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label for="template" class="required">Выберите шаблон:</label>
+                <select id="template" name="template" required>
+                    {% for template in templates %}
+                        <option value="{{template}}">{{template}}</option>
+                    {% endfor %}
+                </select>
+                <span style="margin-right: 20px;"></span>
+                <a href="javascript:void(0)" id="template-preview-btn">Предпросмотр</a>
+            </div>
+        </div>
+    </fieldset> 
+    <div class="submit-row">
+        <input type="submit" value="Отправить" class="default"/>
+        <p class="deletelink-box">
+            <a href="javascript:void(0);" class="deletelink">Закрыть</a>
+        </p>
+    </div>
+    <div class="loading">Загрузка</div>
+    <div class="success">Письмо отправлено в работу</div>
+    <div class="failure"></div>
+    </form>
+</div>
+<div id="email-preview" class="email-preview popup">
+    <div id="email-preview-content">
+    </div>
+    <div class="submit-row">
+        <p class="deletelink-box">
+            <a href="javascript:void(0);" class="deletelink">Закрыть</a>
+        </p>
+    </div>
+</div>
+{% endblock content %}

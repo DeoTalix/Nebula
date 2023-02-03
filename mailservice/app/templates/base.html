@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css">
+        {% block links %}
+        {% endblock links %}
+    </head>
+    <body>
+        <div id="container">
+            <div id="content" class="colM"> 
+                {% block content %}
+                {% endblock content %}
+            </div>
+            <!-- end of content -->
+        </div>
+        <!-- end of container -->
+        {% block scripts %}
+        {% endblock scripts %}
+    </body>
+</html>

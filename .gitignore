@@ -1,0 +1,12 @@
+.env
+.venv/
+bin/
+migrations/
+staticfiles/
+*.log
+*.pyc
+*.sqlite3
+*.pid
+celerybeat-schedule
+gunicorn_config.py
+run-ubuntu.sh

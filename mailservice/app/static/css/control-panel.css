@@ -1,0 +1,53 @@
+.loading, .success, .failure {
+    display: none;
+    padding: 10px;
+}
+
+.loading {
+    background-color: aliceblue;
+}
+
+.success {
+    background-color: lightgreen;
+}
+
+.failure {
+    background-color: indianred;
+}
+
+.d-block {
+    display: block!important;
+}
+
+.sendMessageBtn {
+    color: #999!important;
+    background: white!important;
+    border: 1px solid #999!important;
+}
+
+.sendMessageBtn:hover {
+    color: #999!important;
+    background: white!important;
+    border: 1px solid #999!important;
+}
+
+.sendMessageBtn.active {
+    color: #544b30!important; 
+    background: yellow!important; 
+    border: 1px solid darkgoldenrod!important; 
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1001;
+    padding: 20px 40px;
+    background: white;
+    filter: drop-shadow(2px 4px 6px black);
+    border-radius: 5px;
+    margin: 40px;
+    min-width: 500px;
+    width: calc(100% - 160px);
+}

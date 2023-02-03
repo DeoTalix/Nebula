@@ -1,0 +1,13 @@
+{% extends 'base-mail-template.html' %}
+
+{% block body %}
+<table style="background: #dfffd7; padding: 20px 40px; border-radius: 5px;">
+    <tbody>
+        <tr>
+            <td>                
+                {{ content | safe }}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock body %}
