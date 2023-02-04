@@ -19,20 +19,20 @@ class Person(models.Model):
 
     name = models.CharField(
         "Имя получателя", 
-        max_length=200,
-        blank=False, 
-        null=False
+        max_length = 200,
+        blank = False, 
+        null = False
     )
     email = models.EmailField(
         "Email получателя",
-        unique=True,
-        blank=False,
-        null=False,
+        unique = True,
+        blank = False,
+        null = False,
     )
     birthday = models.DateField(
         "День рождения получателя", 
-        blank=True, 
-        null=True
+        blank = True, 
+        null = True
     )
 
     def __str__(self):

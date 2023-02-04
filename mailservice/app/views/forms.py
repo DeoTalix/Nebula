@@ -52,11 +52,7 @@ def ajax_new_message_form_submit(req, *args, **kwargs):
     if req.method == "POST":
         # Parse form data
         data = json.load(req)
-        # Get person queryset
-        person_ids = data.get("person_ids")
-        persons = Person.objects.filter(id__in=person_ids)
-        
-        # Create new message object
+        # Create new message object using form data
         form_data = data.get("form_data")
         message = Message.objects.create(
             due_date = form_data.get("due_date") or None,
@@ -64,13 +60,15 @@ def ajax_new_message_form_submit(req, *args, **kwargs):
             text     = form_data.get("message"),
             template = form_data.get("template"),
         )
+        # Get person queryset
+        person_ids = data.get("person_ids")
+        persons = Person.objects.filter(id__in=person_ids)
         # Attach person queryset to message and save again
         message.person = persons
         message.save()
-
-        # Send non blocking message immediately if due date is not set
+        # Send non blocking messages immediately to each recepient
+        # if due date is not set
         if message.due_date is None:
-            # broadcast_message.apply_async([message])
             broadcast_message(message)
         else:
             pass
@@ -96,7 +94,10 @@ def ajax_get_mail_template_list(req, *args, **kwargs):
         Status 500 if errors occurred.
     """
     if req.method == "POST":
-        data = json.dumps(os.listdir(settings.TEMPLATES_MAIL_PATH))
+        # Get a list of template names from settings path
+        templates = os.listdir(settings.TEMPLATES_MAIL_PATH)
+        # Return them as json
+        data = json.dumps(templates)
         return JsonResponse(data, safe=False)
     return response_forbidden
 
@@ -107,7 +108,7 @@ def ajax_email_preview(req, *args, **kwargs):
     Parameters
     ----------
     req : django.http.request.HttpRequest
-        Expected: post method request with json object containt form data.
+        Expected: post method request with json object containing form data.
             {
                 "message" : "Message text", 
                 "template": "default-mail.html"
@@ -122,26 +123,30 @@ def ajax_email_preview(req, *args, **kwargs):
         Status 500 if errors occurred.
     """
     if req.method == "POST":
-        # Get 
+        # Parse json data
         data = json.load(req)
         message = data.get("message")
         template = data.get("template")
-
+        # Return status 500 if no template found in json data
         if template is None:
             return HttpResponse("", status = 500)  
-
+        # Create dummy context for template preview
         dummy_context = dict(
             username = 'Имя пользователья',
             birthday = date.today(),
         )
+        # Render message provided by user
         rendered_message = render_content_template(message, dummy_context)
-
+        # Create new context for mail template that wraps rendered user message
         context = dict(
             content = rendered_message,
             person_id=1,
             mail_id=1,
         )
+        # Get mail template dir from setting path
+        # Conctenate it with template name
         mail_template_dirname = os.path.split(settings.TEMPLATES_MAIL_PATH)[-1]
         template_name = mail_template_dirname + "/%s" % template
+        # Return rendered template
         return render(req, template_name, context)
     return response_forbidden

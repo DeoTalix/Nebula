@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from .views import (
+    view_home,
     view_tracking_image,
     ajax_email_preview,
     ajax_new_message_form_submit,
@@ -8,6 +9,11 @@ from .views import (
 )
 
 urlpatterns = [
+    url(
+        r"^$",
+        view_home,
+        name="home",
+    ),
     url(
         r"^media-files/(?P<mail_id>\d+)-(?P<person_id>\d+)/logo.png$", 
         view_tracking_image, 

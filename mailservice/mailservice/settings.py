@@ -18,6 +18,8 @@ from django.core.management.utils import get_random_secret_key
 from celery.schedules import crontab
 from dotenv import load_dotenv
 
+from app.utils import get_ngrok_hostname
+
 # Load environmental variables
 if load_dotenv() == False:
     raise Exception("Failed to load .env file")
@@ -39,11 +41,13 @@ SECRET_KEY = get_random_secret_key()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-# CURRENT_HOST = "127.0.0.1"
-# CURRENT_PORT = ":8000"
-
-CURRENT_HOST = "7b57-91-122-146-133.eu.ngrok.io"
-CURRENT_PORT = ""
+CURRENT_HOST = "127.0.0.1"
+CURRENT_PORT = ":8000"
+try:
+    CURRENT_HOST = get_ngrok_hostname()
+    CURRENT_PORT = ""
+except IOError:
+    pass
 
 ALLOWED_HOSTS = (
     "localhost",

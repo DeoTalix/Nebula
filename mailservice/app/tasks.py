@@ -155,8 +155,10 @@ def broadcast_message(message):
     message.save()
 
     # Iteration over each person is necessary in order to be able to render
-    # provided content and template with persons data context
+    # provided content and template with person's data context
     for person in persons:
+        # Render mail template including user provided content with person's 
+        # data as context
         try:
             rendered_message = render_message(
                 message, 

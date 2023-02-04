@@ -16,36 +16,36 @@ class EmailStatus(models.Model):
     ----------
     person  : app.models.Person
     message : app.models.Message
-    opened  : bool
-    report  : str
+    opened  : bool                  , default = False
+    report  : str                   , default = ""
         Report contains various messages about email state. 
         In case of failure error message will be stored in this field.
     """
     person = models.ForeignKey(
         Person, 
-        verbose_name="Получатель", 
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False,
+        verbose_name = "Получатель", 
+        on_delete = models.CASCADE,
+        blank = False,
+        null = False,
     )
     message = models.ForeignKey(
         Message, 
-        verbose_name="Сообщение", 
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False,
+        verbose_name = "Сообщение", 
+        on_delete = models.CASCADE,
+        blank = False,
+        null = False,
     )
     opened = models.BooleanField(
         "Письмо было открыто",
-        default=False,
-        blank=False,
-        null=False
+        default = False,
+        blank = False,
+        null = False
     )
     report = models.TextField(
         "Отчет",
-        default="",
-        blank=False,
-        null=False
+        default = "",
+        blank = False,
+        null = False
     )
 
     def add_record(self, text):
@@ -89,22 +89,3 @@ class EmailStatus(models.Model):
         )
         status.add_record("Created on %s" % timezone.now())
         return status
-
-    # @classmethod
-    # def get_or_create(cls, message_id, person_id):
-    #     """A class method for getting or otherwise creating new EmailStatus
-    #     instance.
-
-    #     Parameters
-    #     ----------
-    #     message_id : int
-    #     person_id  : int
-
-    #     Returns
-    #     -------
-    #     app.models.EmailStatus
-    #     """
-    #     try:
-    #         return cls.objects.get(message__id=message_id, person__id=person_id)
-    #     except EmailStatus.DoesNotExist:
-    #         return cls.create_by_id(message_id, person_id)

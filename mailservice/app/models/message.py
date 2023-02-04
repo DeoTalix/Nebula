@@ -25,7 +25,7 @@ class Message(models.Model):
     subject
         Mail subject
     text
-        Mail plain text, intended to render with django template engine.
+        Mail plain text, intended to be rendered with django template engine.
     template
         Name for selected template located in app/templates/mail_templates dir.
     status
@@ -33,53 +33,53 @@ class Message(models.Model):
     """
     
     person = models.ManyToManyField(
-        verbose_name="Получатели",
-        to=Person,
-        default=1,
-        blank=False,
+        verbose_name = "Получатели",
+        to = Person,
+        default = 1,
+        blank = False,
     )
     due_date = models.DateTimeField(
         "Дата будущего отправления",
-        blank=True,
-        null=True,
+        blank = True,
+        null = True,
     )
     subject = models.CharField(
         "Тема сообщения",
-        max_length=200,
-        default="",
-        blank=False,
-        null=False,
+        max_length = 200,
+        default = "",
+        blank = False,
+        null = False,
     )
     text = models.TextField(
         "Текст сообщения",
-        default="",
-        blank=True,
-        null=False,
+        default = "",
+        blank = True,
+        null = False,
     )
     template = models.CharField(
         "Путь к файлу шаблона",
-        max_length=200,
-        default="default-mail.html",
-        blank=False,
-        null=False,
+        max_length = 200,
+        default = "default-mail.html",
+        blank = False,
+        null = False,
     )
     status = models.CharField(
         "Статус сообщения",
-        max_length=1,
-        choices=[
+        max_length = 1,
+        choices = [
             ("w", "Ожидает отправки"),
             ("b", "В работе"),
             ("s", "Отправлено"),
             ("x", "Отменено"),
         ],
-        default="w",
-        blank=False,
-        null=False,
+        default = "w",
+        blank = False,
+        null = False,
     )
     date_sent = models.DateTimeField(
         "Дата совершенного отправления",
-        blank=True,
-        null=True,
+        blank = True,
+        null = True,
     )
 
     def __str__(self):
