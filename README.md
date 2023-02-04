@@ -123,9 +123,8 @@ classDiagram
 
 ## Тестовый запуск
 Для того чтобы протестировать сервис вручную, рекомендуется:
-1. установить [ngrok](https://ngrok.com/docs/getting-started), чтобы протестировать отслеживание открытия письма
-1. запустить `ngrok http 8000`
 1. проверить активный статус rabbitmq `systemctl status rabbitmq-server`
+1. запустить `ngrok http 8000`, чтобы протестировать отслеживание открытия письма
 1. перезапустить django сервер `python manage.py runserver` (сервер получит ngrok hostname сам)
 1. запустить `celery -A mailservice worker -l info`
 1. запустить `celery -A mailservice beat -l info`
