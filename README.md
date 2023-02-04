@@ -1,5 +1,22 @@
 # Функционал
 
+## Возможности
+
+### Рассылка писем подписчикам хранящимся в базе данных
+Письма можно отправлять как немедленно так и планировать отправеление на определенную дату, время. Для немедленных используется `celery worker`. Для отложенных - `celery beat`.
+
+### Настройка периода обработки отложенных рассылок. 
+Удобное ограничения для того, чтобы, к примеру, письма рассылались только в рабочие часы, даже если они были запланированы на ночь. Ограничение периода может быть любым - от ежеминутного до ежегодного (`celery.shedules.crontab`).
+
+### Поддержка django template engine для шаблонов письма
+Пользователь, создающий сообщение, имеет возможность использовать HTML, CSS а также синтаксические конструкции django template engine. Например можно вставлять данные адресатов из базы данных `{{ username }}`, `{{ birthday }}`, создавать условные конструкции `{% if %}`, создавать циклы `{% for %}`, наследоваться от других шаблонов `{% extentds ... %}`, использовать различные блоки `{% head %}`, `{% extrastyle %}`, `{{ block.super }}` предусмотренные родительским шаблоном, и так далее.
+
+### Отслеживание открытий писем
+Отслеживается запрос на загрузку изображения в теле письма. Запрос также предоставляет id ползователя и id письма. На основе этих данных в базе создается объект отчета в который записываются логи того когда письмо было создано/отправлено/отменено, сколько раз и когда письмо было открыто. Отчет предназначен для хранения любой полезной информации связанной с конкретным письмом отправленным конкретному адресату.
+
+### Предпросмотр письма для выбранного шаблона
+В форме создания нового сообщения предусмотрена возможность посмотреть на то, как письмо будет выглядеть для адресата. То есть оно ренедерится на сервере с шаблонным контекстом и затем асинхронно возвращается во фронтенд пользователю.
+
 ## Модели
 
 ### Person
@@ -29,17 +46,17 @@ classDiagram
 
     class Message {
         person    : Person (mtm)
-        due_date  : date | None
+        due_date  : datetime | None
         subject   : str         
         text      : str         
         template  : str         
         status    : str         
-        date_sent : date or None
+        date_sent : datetime | None
     }
     class Person {
         name      : str
         email     : str
-        birthday  : datetime or None
+        birthday  : datetime | None
     }
     class EmailStatus {
         person    : Person (fk)
@@ -59,24 +76,35 @@ classDiagram
 
 Если дата не указана сообщение будет отправлено немедленно всем выбранным пользователям, в противном случае его отправит celery beat настроенный на ежедневный период, каждый час с 9 - 18 часов.
 
-Сообщение пользователя поддерживает html синтаксис и конструкции django template engine. То есть в теле письма можно отображать контент на заданных условиях используя {% if %}{% endif %}, своершать итерации, или просто подставлять переменные {{ username }}, {{ birthday }}.
+Сообщение пользователя поддерживает html синтаксис и конструкции django template engine. То есть в теле письма можно отображать контент на заданных условиях используя `{% if %}{% endif %}`, совершать итерации, или просто подставлять переменные `{{ username }}`, `{{ birthday }}`.
 
 Доступен предпросмотр введенных данных на выбранном шаблоне во всплывающем окне по нажатию на кнопку __"Предпросмотр"__ рядом со списком шаблонов в форме.
 
 ## Логи
-Все логи сохраняются в mailservice/log/. Для django и celery настроены по 2 лога: debug.log и error.log.
+Все логи сохраняются в `mailservice/log/`. Для django и celery настроены по 2 лога: `debug.log` и `error.log`.
 
 ## Шаблоны
-Находятся в директории mailservice/app/templates/mail_templates/
+Находятся в директории `mailservice/app/templates/mail_templates/`
 
 ## Установка
 - [rabbitmq-server](https://www.rabbitmq.com/download.html)
+    - `sudo rabbitmqctl add_user myuser mypassword`
+    - `sudo rabbitmqctl add_vhost myvhost`
+    - `sudo rabbitmqctl set_user_tags myuser mytag`
+    - `sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"`
 - python2.7
     - `python2 -m ensurepip`
     - `virtualenv -p /path/to/python2.7/bin/python .venv`
     - `source .venv/bin/activate`
-    - `pip install -r requirements.txt`
-    - или `pip install -r requirements-dump.txt`
+    - `pip install -r requirements.txt` или `requirements-dump.txt`
+- .env
+    - `EMAIL_HOST='smtp.mailhost.ru'`
+    - `EMAIL_PORT=465`
+    - `EMAIL_HOST_USER='username@mailhost.ru'`
+    - `EMAIL_HOST_PASSWORD='asldfjlasjdg'`
+    - `CELERY_USER="myuser"`
+    - `CELERY_PASSWORD="mypassword"`
+    - `CELERY_HOST="myvhost"`
 - django
     - `python manage.py makemigrations`
     - `python manage.py migrate`

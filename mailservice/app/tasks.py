@@ -216,9 +216,7 @@ def update_email_status(mail_id, person_id,):
     -------
     None
     """
-    
     status = None
-
     try:
         # Use person and mail ids to update tracking status
         status = EmailStatus.objects.get(person=person_id, message=mail_id)
@@ -233,5 +231,5 @@ def update_email_status(mail_id, person_id,):
         return
     # Update status
     status.opened = True
-    status.report += "Opened on %s\n" % timezone.now()
-    status.save()
+    status.add_record("Opened on %s" % timezone.now())
+
