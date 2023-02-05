@@ -111,6 +111,7 @@ classDiagram
 Находятся в директории `mailservice/app/templates/mail_templates/`
 
 ## Установка
+- `git clone https://github.com/DeoTalix/Nebula.git`
 - [rabbitmq-server](https://www.rabbitmq.com/download.html)
     - `sudo rabbitmqctl add_user myuser mypassword`
     - `sudo rabbitmqctl add_vhost myvhost`
@@ -118,7 +119,9 @@ classDiagram
     - `sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"`
 - python2.7
     - `python2 -m ensurepip`
-    - `virtualenv -p /path/to/python2.7/bin/python .venv`
+    - `python2 -m pip install virtualenv`
+    - `cd Nebula`
+    - `virtualenv -p /usr/bin/python2.7 .venv`
     - `source .venv/bin/activate`
     - `pip install -r requirements.txt` или `requirements-dump.txt`
 - .env
@@ -130,12 +133,11 @@ classDiagram
     - `CELERY_PASSWORD="mypassword"`
     - `CELERY_HOST="myvhost"`
 - django
-    - `python manage.py makemigrations`
-    - `python manage.py migrate`
+    - `python manage.py migrate --run-syncdb`
     - `python manage.py collectstatic`
     - `python manage.py createsuperuser`
-- опционально
-    - [ngrok](https://ngrok.com/docs/getting-started) 
+    - `python manage.py loaddata app/fixture/Person.json`
+- [ngrok](https://ngrok.com/docs/getting-started) (опционально)
 
 
 ## Тестовый запуск
@@ -145,7 +147,7 @@ classDiagram
 1. перезапустить django сервер `python manage.py runserver` (сервер получит ngrok hostname сам)
 1. запустить `celery -A mailservice worker -l info`
 1. запустить `celery -A mailservice beat -l info`
-1. загрузить фикстуры `python manage.py loaddata mailservice/app/fixtures/Person.json`
+1. загрузить фикстуры если база пустая `python manage.py loaddata mailservice/app/fixtures/Person.json`
 1. создать новые сообщения на странице http://127.0.0.1:8000/admin/app/person/ (кнопка "Отправить сообщение" рядом с кнопкой "добавить пользователя")
     ![](screenshots/Screenshot%20from%202023-02-04%2007-39-56.png)
     ![](screenshots/Screenshot%20from%202023-02-04%2007-41-20.png)
