@@ -1,4 +1,6 @@
 #!/bin/bash
+echo
+echo "Removing: .venv, .env, db.sqlite3, staticfiles, logs, migrations"
 rm -rf .venv
 rm .env
 rm -rf mailservice/db.sqlite3
