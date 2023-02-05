@@ -151,7 +151,7 @@ classDiagram
 1. создать новые сообщения на странице http://127.0.0.1:8000/admin/app/person/ (кнопка "Отправить сообщение" рядом с кнопкой "добавить пользователя")
     ![](screenshots/Screenshot%20from%202023-02-04%2007-39-56.png)
     ![](screenshots/Screenshot%20from%202023-02-04%2007-41-20.png)
-1. открыть письма на страницах https://www.1secmail.com/?login=gdflkjgld&domain=bheps.com и https://www.1secmail.com/?login=YosdfsjWlsdlfj&domain=bheps.com
+1. открыть письма на страницах https://www.1secmail.com/?login=gdflkjgld&domain=bheps.com и https://www.1secmail.com/?login=YosdfsjWlsdlfj&domain=bheps.com. Рекомендуется google chrome так как firefox может блокировать отображение изображений с ngrok (в этом случае можно, просто, открыть изображение в новой вкладке)
     ![](screenshots/Screenshot%20from%202023-02-04%2007-45-14.png)
     ![](screenshots/Screenshot%20from%202023-02-04%2007-45-33.png)
 1. открыть первое письмо на странице http://127.0.0.1:8000/admin/app/message/ или трекер на странице http://127.0.0.1:8000/admin/app/emailstatus/
