@@ -10,3 +10,5 @@ staticfiles/
 celerybeat-schedule
 gunicorn_config.py
 run-ubuntu.sh
+notes.txt
+

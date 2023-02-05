@@ -4,16 +4,15 @@
     - [Рассылка писем подписчикам из базы данных](#рассылка-писем-подписчикам-из-базы-данных)
     - [Настройка периода обработки отложенных рассылок](#настройка-периода-обработки-отложенных-рассылок)
     - [Шаблоны писем](#шаблоны-писем)
-    - [Поддержка django template engine для пользовательских собщений](#поддержка-django-template-engine-для-пользовательских-собщений)
+    - [Поддержка django template engine для пользовательских сообщений](#поддержка-django-template-engine-для-пользовательских-собщений)
     - [Отслеживание открытых писем](#отслеживание-открытых-писем)
     - [Предпросмотр письма для выбранного шаблона](#предпросмотр-письма-для-выбранного-шаблона)
+    - [Логи](#логи)
 - [Модели](#модели)
     - [Person](#person)
     - [Message](#message)
     - [EmailStatus](#emailstatus)
 - [Форма создания нового сообщения](#форма-создания-нового-сообщения)
-- [Логи](#логи)
-- [Шаблоны](#шаблоны)
 - [Установка](#установка)
 - [Тестовый запуск](#тестовый-запуск)
 
@@ -28,6 +27,8 @@
 ### Шаблоны писем
 Доступна возможность создавать новые шаблоны которые будут доступны для выбора в форме создания нового сообщения. Шаблон поддерживает HTML, CSS и django template синтаксисы. Может расширяться другими шаблонами. Каждый такой шаблон содержит тэг `{{ content | safe }}` для того, чтобы отображать содержимое пользовательского сообщения отправлемого через форму создания нового сообщения.
 
+Находятся в директории `mailservice/app/templates/mail_templates/`
+
 ### Поддержка django template engine для пользовательских собщений
 Пользователь, создающий сообщение, имеет возможность использовать HTML, CSS а также синтаксические конструкции django template engine. Например можно вставлять данные адресатов из базы данных `{{ username }}`, `{{ birthday }}`, создавать условные конструкции `{% if %}`, создавать циклы `{% for %}`, наследоваться от других шаблонов `{% extentds %}`, использовать различные блоки `{% head %}`, `{% extrastyle %}`, `{{ block.super }}` предусмотренные родительским шаблоном, и так далее. Однако рендерится сообщение, со своим контекстом, отдельно от шаблона письма .
 
@@ -36,6 +37,9 @@
 
 ### Предпросмотр письма для выбранного шаблона
 В форме создания нового сообщения предусмотрена возможность посмотреть на то, как письмо будет выглядеть для адресата. То есть оно ренедерится на сервере с шаблонным контекстом и затем асинхронно возвращается во фронтенд пользователю.
+
+### Логи
+Все логи сохраняются в `mailservice/log/`. Для django и celery настроены по 2 лога: `debug.log` и `error.log`.
 
 ## Модели
 
@@ -63,11 +67,10 @@
 title: Objects relationship
 ---
 classDiagram
-    Person <|-- Message
+    Person --|> Message
     EmailStatus --|> Person
     EmailStatus --|> Message
     
-
     class Message {
         person    : Person (mtm)
         due_date  : datetime | None
@@ -94,7 +97,7 @@ classDiagram
 ## Форма создания нового сообщения
 Сервис использует встроенные возможности django admin для управления рассылкой.
 
-На страницу http://127.0.0.1:8000/admin/app/person/ добавлена кнопка __"Отправить сообщение"__ которая открывает всплывающее окно с формой отправки сообщения для выбранных пользователей. 
+На страницу [списка адресатов](http://127.0.0.1:8000/admin/app/person/) добавлена кнопка __"Отправить сообщение"__ которая открывает всплывающее окно с формой отправки сообщения для выбранных пользователей. 
 
 В форме необходимо ввести тему, сообщение и выбрать шаблон, а также необязательную дату отправления.
 
@@ -104,55 +107,93 @@ classDiagram
 
 Доступен предпросмотр введенных данных на выбранном шаблоне во всплывающем окне по нажатию на кнопку __"Предпросмотр"__ рядом со списком шаблонов в форме.
 
-## Логи
-Все логи сохраняются в `mailservice/log/`. Для django и celery настроены по 2 лога: `debug.log` и `error.log`.
+## Установка на чистую Ubuntu 22.04 при помощи bash скрипта
+```
+sudo apt upgrade
+sudo apt install git
+git clone https://github.com/DeoTalix/Nebula.git
+cd Nebula
+chmod +x setup_ubuntu2204.sh
+chmod +x clean_ubuntu2204.sh
+chmod +x run_ubuntu2204.sh
+sudo ./setup_ubuntu2204.sh
+```
 
-## Шаблоны
-Находятся в директории `mailservice/app/templates/mail_templates/`
-
-## Установка
+## Установка вручную
+- git
+    ```bash
+    git clone https://github.com/DeoTalix/Nebula.git
+    ```
 - [rabbitmq-server](https://www.rabbitmq.com/download.html)
-    - `sudo rabbitmqctl add_user myuser mypassword`
-    - `sudo rabbitmqctl add_vhost myvhost`
-    - `sudo rabbitmqctl set_user_tags myuser mytag`
-    - `sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"`
+    ```bash
+    sudo rabbitmqctl add_user myuser mypassword
+    sudo rabbitmqctl add_vhost myvhost
+    sudo rabbitmqctl set_user_tags myuser mytag
+    sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
+    ```
 - python2.7
-    - `python2 -m ensurepip`
-    - `virtualenv -p /path/to/python2.7/bin/python .venv`
-    - `source .venv/bin/activate`
-    - `pip install -r requirements.txt` или `requirements-dump.txt`
+    ```bash
+    python2 -m ensurepip
+    python2 -m pip install virtualenv
+    cd Nebula
+    virtualenv -p /usr/bin/python2.7 .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt` или `requirements-dump.txt
+    ```
 - .env
-    - `EMAIL_HOST='smtp.mailhost.ru'`
-    - `EMAIL_PORT=465`
-    - `EMAIL_HOST_USER='username@mailhost.ru'`
-    - `EMAIL_HOST_PASSWORD='asldfjlasjdg'`
-    - `CELERY_USER="myuser"`
-    - `CELERY_PASSWORD="mypassword"`
-    - `CELERY_HOST="myvhost"`
+    ```bash
+    EMAIL_HOST='smtp.mailhost.ru'
+    EMAIL_PORT=465
+    EMAIL_HOST_USER='username@mailhost.ru'
+    EMAIL_HOST_PASSWORD='asldfjlasjdg'
+    CELERY_USER="myuser"
+    CELERY_PASSWORD="mypassword"
+    CELERY_HOST="myvhost"
+    ```
 - django
-    - `python manage.py makemigrations`
-    - `python manage.py migrate`
-    - `python manage.py collectstatic`
-    - `python manage.py createsuperuser`
-- опционально
-    - [ngrok](https://ngrok.com/docs/getting-started) 
-
+    ```
+    python manage.py migrate --run-syncdb
+    python manage.py loaddata app/fixtures/Person.json
+    python manage.py collectstatic
+    python manage.py createsuperuser
+    ```
+- [ngrok](https://ngrok.com/docs/getting-started) (опционально)
+    ```
+    ngrok config add-authtoken <authtoken-from-ngrok.io>
+    ```
 
 ## Тестовый запуск
 Для того чтобы протестировать сервис вручную, рекомендуется:
-1. проверить активный статус rabbitmq `systemctl status rabbitmq-server`
-1. запустить `ngrok http 8000`, чтобы протестировать отслеживание открытия письма
-1. перезапустить django сервер `python manage.py runserver` (сервер получит ngrok hostname сам)
-1. запустить `celery -A mailservice worker -l info`
-1. запустить `celery -A mailservice beat -l info`
-1. загрузить фикстуры `python manage.py loaddata mailservice/app/fixtures/Person.json`
-1. создать новые сообщения на странице http://127.0.0.1:8000/admin/app/person/ (кнопка "Отправить сообщение" рядом с кнопкой "добавить пользователя")
+1. Запуск при помощи скрипта откроет 3 фоновых процесса и сервер django. При остановке сервера по нажатию комбинации клавиш ctrl-c, запущенные фоновые процессы также будут закрыты.
+    ```bash
+    sudo run_ubuntu2204.sh
+    ```
+1. Запуск вручную
+
+    ```bash
+    # проверить активный статус rabbitmq 
+    systemctl status rabbitmq-server
+    # запустить ngrok, чтобы протестировать отслеживание открытия письма
+    ngrok http 8000
+    # перезапустить django сервер (сервер получит ngrok hostname сам)
+    python manage.py runserver
+    # запустить 2 процесса celery
+    celery -A mailservice worker -l info
+    celery -A mailservice beat -l info
+    ```
+1. Загрузить фикстуры если база пустая 
+
+    ```bash
+    python manage.py loaddata mailservice/app/fixtures/Person.json
+    ```
+1. Создать новые сообщения на странице [списка адресатов](http://127.0.0.1:8000/admin/app/person/) (кнопка "Отправить сообщение" рядом с кнопкой "добавить пользователя")
     ![](screenshots/Screenshot%20from%202023-02-04%2007-39-56.png)
     ![](screenshots/Screenshot%20from%202023-02-04%2007-41-20.png)
-1. открыть письма на страницах https://www.1secmail.com/?login=gdflkjgld&domain=bheps.com и https://www.1secmail.com/?login=YosdfsjWlsdlfj&domain=bheps.com
+1. Открыть почтовые ящики [первого адресата](https://www.1secmail.com/?login=gdflkjgld&domain=bheps.com) и [второго](https://www.1secmail.com/?login=YosdfsjWlsdlfj&domain=bheps.com). Рекомендуется использовать google chrome так как firefox может блокировать отображение изображений с ngrok (в этом случае можно просто открыть изображение в новой вкладке)
     ![](screenshots/Screenshot%20from%202023-02-04%2007-45-14.png)
     ![](screenshots/Screenshot%20from%202023-02-04%2007-45-33.png)
-1. открыть первое письмо на странице http://127.0.0.1:8000/admin/app/message/ или трекер на странице http://127.0.0.1:8000/admin/app/emailstatus/
+1. Открыть последнее отправленное сообщение в [таблице сообщений](http://127.0.0.1:8000/admin/app/message/), или [адресата](http://127.0.0.1:8000/admin/app/person/), или [трекер](http://127.0.0.1:8000/admin/app/emailstatus/). На страницах сообщения и адресата трекер будет отображен внизу ввиде инлайн таблицы.
     ![](screenshots/Screenshot%20from%202023-02-04%2007-35-44.png)
     ![](screenshots/Screenshot%20from%202023-02-04%2007-35-18.png)
-1. создать новое отложенное сообщение с датой отправления в той же форме (либо изменить дату и статус существующего) и повторить шаги 8 и 9 когда оно будет отправлено. Celery beat отправляет отложенные письма каждый час в период с 9 - 18 (это можно изменить в `mailservice/mailservice/settings.py`)
+1. Создать новое отложенное сообщение с датой отправления в той же форме (либо изменить дату и статус существующего) и повторить шаги 5 и 6 когда оно будет отправлено. Celery beat отправляет отложенные письма каждый час в период с 9 - 18 (это можно изменить в `mailservice/mailservice/settings.py`)
+
