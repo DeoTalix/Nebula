@@ -46,7 +46,7 @@ CURRENT_PORT = ":8000"
 try:
     CURRENT_HOST = get_ngrok_hostname()
     CURRENT_PORT = ""
-except IOError:
+except Exception:
     pass
 
 ALLOWED_HOSTS = (
