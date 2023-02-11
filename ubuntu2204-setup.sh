@@ -1,5 +1,5 @@
-#!/bin/bash
-sudo ./clean.sh
+#!/bin/sh
+mkdir -p mailservice/logs
 echo
 echo "Installing rabbitmq-server"
 echo "--------------------------"
@@ -28,7 +28,7 @@ echo
 echo "Activating virtual environment"
 echo "------------------------------"
 python2 -m virtualenv -p /usr/bin/python2.7 .venv
-source .venv/bin/activate
+. .venv/bin/activate
 echo
 echo "Installing pip requirements"
 echo "---------------------------"
@@ -49,11 +49,10 @@ sudo echo "CELERY_USER=myuser" >> .env
 sudo echo "CELERY_PASSWORD=mypassword" >> .env
 sudo echo "CELERY_HOST=myvhost" >> .env
 echo
-cd mailservice
-mkdir -p logs
 echo
 echo "Setting up django"
 echo "-----------------"
+cd mailservice
 python manage.py migrate --run-syncdb
 python manage.py loaddata app/fixtures/Person.json
 python manage.py collectstatic
