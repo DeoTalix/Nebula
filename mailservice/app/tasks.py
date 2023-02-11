@@ -216,19 +216,20 @@ def update_email_status(mail_id, person_id,):
     -------
     None
     """
-    status = None
     try:
         # Use person and mail ids to update tracking status
-        status = EmailStatus.objects.get(person=person_id, message=mail_id)
+        status = EmailStatus.objects.get(
+            person=person_id, 
+            message=mail_id
+        )
     except EmailStatus.DoesNotExist as e:
         # Try to create new status in case person and message exist
         try:
             status = EmailStatus.create_by_id(mail_id, person_id)
         except (Person.DoesNotExist, Message.DoesNotExist) as e:
             log.error(e)
+            return
 
-    if status is None:
-        return
     # Update status
     status.opened = True
     status.add_record("Opened on %s" % timezone.now())

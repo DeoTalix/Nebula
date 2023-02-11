@@ -59,7 +59,7 @@
 ### EmailStatus
 Содержит указатели на Person и Message (foreign key), статус указывающий на то, что письмо было открыто получателем, и отчет, в который записываются в виде лога такие данные как: дата создания, открытия, ошибки и так далее.
 
-Также отображается на страннице редактирования связанных объектов в виде инлайн таблицы в режиме только для чтения.
+Также отображается на странице редактирования связанных объектов в виде инлайн таблицы в режиме только для чтения.
 
 Можно фильтровать по всем параметрам кроме отчета.
 
@@ -158,7 +158,7 @@ sudo ./setup_ubuntu2204.sh
     python manage.py collectstatic
     python manage.py createsuperuser
     ```
-- [ngrok](https://ngrok.com/docs/getting-started) (опционально)
+- [ngrok](https://dashboard.ngrok.com/get-started/your-authtoken) (опционально)
     ```
     ngrok config add-authtoken <authtoken-from-ngrok.io>
     ```
