@@ -19,7 +19,7 @@ from django.core.management.utils import get_random_secret_key
 from celery.schedules import crontab
 from dotenv import load_dotenv
 
-from app.utils import get_ngrok_hostname
+from app.utils import get_ngrok_host
 
 
 
@@ -30,6 +30,9 @@ assert sys.version.startswith("2.7"), "Unsupported version of python. "\
 # Load environmental variables
 assert load_dotenv(), "Failed to load .env file"
 
+# Ngrok
+# True means ngrok is used for deployment
+NGROK = True if os.getenv("NGROK") == '1' else False
 
 # Check required environmental variables
 ENV_KEYS = "EMAIL_HOST EMAIL_PORT EMAIL_HOST_USER EMAIL_HOST_PASSWORD"
@@ -49,13 +52,16 @@ SECRET_KEY = get_random_secret_key()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-try:
-    CURRENT_HOST = get_ngrok_hostname()
-    CURRENT_PORT = ""
-except Exception:
-    pass
 CURRENT_HOST = os.getenv("CURRENT_HOST", "127.0.0.1")
 CURRENT_PORT = os.getenv("CURRENT_PORT", ":8000")
+if NGROK is True:
+    NGROK_TUNNELS_URL = os.getenv(
+        "NGROK_TUNNELS_URL", 
+        "http://127.0.0.1:4040/api/tunnels"
+    )
+    # Override current host and port with obtained ngrok hostname
+    CURRENT_HOST, CURRENT_PORT = get_ngrok_host() \
+                                    or (CURRENT_HOST, CURRENT_PORT)
 
 print("Using %s%s as the current host." % (CURRENT_HOST, CURRENT_PORT))
 
@@ -95,6 +101,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "mailservice.middleware.NgrokMiddleware",
 ]
 
 ROOT_URLCONF = 'mailservice.urls'

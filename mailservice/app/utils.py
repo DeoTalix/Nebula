@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 import json
 import urllib2 as urllib
 import urlparse
+from time import sleep
 
 from django.template import (
     Template, 
@@ -34,19 +35,27 @@ def render_content_template(content, ctx):
     return rendered_content
 
 
-def get_ngrok_hostname():
+def get_ngrok_host(number_of_tries=3, sleep_timeout=1):
     """Get ngrok random hostname if possible.
 
-    Raises
-    ------
-    IOError
-        Means ngrok server is not running.
+    Parameters
+    ----------
+    number_of_tries : int, default=3
+    sleep_timeout   : int, default=1
 
     Returns
     -------
-    str
+    tuple[str, str] | None
+        A tuple of ngrok hostname and "" for the port or None.
     """
-    r = urllib.urlopen("http://127.0.0.1:4040/api/tunnels")
-    data = json.loads(r.read())
-    url = urlparse.urlparse(data["tunnels"][0]["public_url"])
-    return url.hostname
+    from django.conf import settings
+    
+    url = settings.NGROK_TUNNELS_URL
+    for _ in range(number_of_tries):
+        try:
+            r = urllib.urlopen(url)
+            data = json.loads(r.read())
+            url = urlparse.urlparse(data["tunnels"][0]["public_url"])
+            return (url.hostname, "")
+        except Exception as e:
+            sleep(sleep_timeout)
