@@ -3,3 +3,4 @@ Django
 celery
 python-dotenv
 dj-static
+gunicorn
