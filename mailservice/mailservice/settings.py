@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 from __future__ import absolute_import
 import os
+import sys
 import socket
 
 from django.core.management.utils import get_random_secret_key
@@ -20,12 +21,19 @@ from dotenv import load_dotenv
 
 from app.utils import get_ngrok_hostname
 
+
+
+
+# Check python version
+assert sys.version.startswith("2.7"), "Unsupported version of python. "\
+                                      "Expected python 2.7"
 # Load environmental variables
-if load_dotenv() == False:
-    raise Exception("Failed to load .env file")
-# Check mandatory environmental variables
-for key in "EMAIL_HOST EMAIL_PORT EMAIL_HOST_USER EMAIL_HOST_PASSWORD "\
-           "CELERY_USER CELERY_PASSWORD CELERY_HOST".split():
+assert load_dotenv(), "Failed to load .env file"
+
+
+# Check required environmental variables
+ENV_KEYS = "EMAIL_HOST EMAIL_PORT EMAIL_HOST_USER EMAIL_HOST_PASSWORD"
+for key in ENV_KEYS.split():
     assert os.getenv(key) is not None, "%s is not found in .env!" % key
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -41,17 +49,20 @@ SECRET_KEY = get_random_secret_key()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-CURRENT_HOST = "127.0.0.1"
-CURRENT_PORT = ":8000"
 try:
     CURRENT_HOST = get_ngrok_hostname()
     CURRENT_PORT = ""
 except Exception:
     pass
+CURRENT_HOST = os.getenv("CURRENT_HOST", "127.0.0.1")
+CURRENT_PORT = os.getenv("CURRENT_PORT", ":8000")
+
+print("Using %s%s as the current host." % (CURRENT_HOST, CURRENT_PORT))
 
 ALLOWED_HOSTS = (
-    "localhost",
+    "0.0.0.0",
     "127.0.0.1",
+    "localhost",
     CURRENT_HOST,
 )
 
@@ -59,8 +70,9 @@ ALLOWED_HOSTS = (
 CSRF_TRUSTED_ORIGINS = [
     "http://%s%s"  % (CURRENT_HOST, CURRENT_PORT),
     "https://%s%s" % (CURRENT_HOST, CURRENT_PORT),
-    "http://localhost:8000",
+    "http://0.0.0.0:8000",
     "http://127.0.0.1:8000",
+    "http://localhost:8000",
 ]
 
 # Application definition
@@ -165,21 +177,29 @@ STATIC_ROOT = "staticfiles"
 
 # Email
 EMAIL_BACKEND       = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST          = socket.gethostbyname(os.getenv('EMAIL_HOST'))
-# EMAIL_HOST          = os.getenv('EMAIL_HOST')
+                      # Set email host as IPv4 
+                      # Raises error if EMAIL_HOST is not defined
+EMAIL_HOST          = os.getenv('EMAIL_HOST') \
+                        and socket.gethostbyname(os.getenv('EMAIL_HOST'))
 EMAIL_PORT          = os.getenv('EMAIL_PORT')
 EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS       = False
 EMAIL_USE_SSL       = True
+EMAIL_USE_TLS       = not EMAIL_USE_SSL
 SERVER_EMAIL        = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER
 
+
 # Celery
-CELERY_BROKER_URL = "amqp://%(user)s:%(pssw)s@127.0.0.1:5672/%(host)s" % dict(
-    user = os.getenv("CELERY_USER"),
-    pssw = os.getenv("CELERY_PASSWORD"),
-    host = os.getenv("CELERY_HOST")
+# Set broker url using defaults if none of the CELERY env variables are specified
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", 
+    "amqp://%(user)s:%(pssw)s@%(host)s%(port)s/%(vhost)s" % dict(
+        host  = os.getenv("CELERY_BROKER_HOST", "127.0.0.1"),
+        port  = os.getenv("CELERY_BROKER_PORT", ":5672"),
+        user  = os.getenv("CELERY_USER",        "myuser"),
+        pssw  = os.getenv("CELERY_PASSWORD",    "mypassword"),
+        vhost = os.getenv("CELERY_VHOST",       "myvhost")
+    )
 )
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_BEAT_SCHEDULE = {
@@ -257,4 +277,4 @@ LOGGING = {
 
 # Mailservice app
 # Max time for resolving email transaction statuses
-BROADCAST_MAX_TIMEOUT   = 5         # minutes
+BROADCAST_MAX_TIMEOUT = 5 # minutes
