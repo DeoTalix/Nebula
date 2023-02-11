@@ -1,0 +1,75 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: docker/nginx
+    image: nginx:alpine
+    depends_on:
+      - django
+    ports:
+      - 80:80
+    volumes:
+      - ./mailservice:/Nebula
+    restart: always
+  django:
+    build: .
+    depends_on:
+      - celery
+      - celery-beat
+    env_file:
+      - ./.env
+    environment:
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - CELERY_BROKER_URL=amqp://rabbitmq:5672
+    expose:
+      - 8000
+    # ports:
+    #   - 8000:8000
+    volumes:
+      - ./mailservice:/Nebula
+    command: gunicorn -b 0.0.0.0:8000 mailservice.wsgi:application
+    restart: always
+  rabbitmq:
+    image: rabbitmq
+    expose:
+      - 5672
+    restart: always
+  celery:
+    build:
+      context: .
+    depends_on:
+      - rabbitmq
+    env_file:
+      - ./.env
+    volumes:
+      - ./mailservice:/Nebula
+    command: "celery -A mailservice worker -l info"
+    restart: always
+  celery-beat:
+    build:
+      context: .
+    depends_on:
+      - celery
+      - rabbitmq
+    env_file:
+      - ./.env
+    volumes:
+      - ./mailservice:/Nebula
+    command: "celery -A mailservice beat -l info"
+    restart: always
+
+# volumes:
+#   app-vol:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       device: "${PWD}/mailservice"
+#       o: bind
+#   static-vol:
+#   media-vol:
+#   logs-vol:
+#   db-vol:
+#   nginx-vol:

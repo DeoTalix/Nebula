@@ -1,0 +1,13 @@
+.venv/
+bin/
+migrations/
+staticfiles/
+*.log
+*.pyc
+*.sqlite3
+*.pid
+.gitignore
+celerybeat-schedule
+gunicorn_config.py
+ubuntu2204-*.sh
+notes.txt

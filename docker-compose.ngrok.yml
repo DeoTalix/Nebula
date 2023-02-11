@@ -1,0 +1,20 @@
+version: '3'
+services:
+  ngrok:
+    image: ngrok/ngrok
+    environment:
+      - NGROK_AUTHTOKEN=2FDNk1DhKWW5weEsGUtfRIlGIIe_2DtgRvEPQCC1smkcuXfdZ
+    command: http nginx:80
+    # ports:
+    #   - 80:80
+    expose:
+      - 4040
+  nginx:
+    expose:
+      - 80
+  django:
+    depends_on:
+      - ngrok
+    environment:
+      - NGROK=1
+      - NGROK_TUNNELS_URL=http://ngrok:4040/api/tunnels
